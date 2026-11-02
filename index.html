@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matematik Bersama Cikgu Wi - Pola dan Jujukan</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .font-fun {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Latar Belakang Beranimasi */
+        .bg-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.15;
+            animation: float 18s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border: 4px solid #facc15;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-bounce {
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .btn-bounce:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-3 md:p-6 relative">
+
+    <!-- Latar Belakang Animasi Simbol Matematik -->
+    <div class="bg-shapes" id="bgShapes"></div>
+
+    <!-- Container Utama -->
+    <div class="w-full max-w-2xl z-10 my-4">
+
+        <!-- SKRIN 1: NAMA & KELAS (START SCREEN) -->
+        <div id="startScreen" class="glass-card rounded-3xl p-5 md:p-8 text-center relative overflow-hidden">
+            
+            <!-- Banner Cikgu Wi -->
+            <div class="rounded-2xl overflow-hidden shadow-lg border-2 border-indigo-100 mb-6 bg-amber-100">
+                <img src="mm.jpg" alt="Matematik Bersama Cikgu Wi" class="w-full h-auto object-cover max-h-48 md:max-h-56" onerror="this.style.display='none'; document.getElementById('fallbackBanner').style.display='block';">
+                <div id="fallbackBanner" class="hidden p-6 bg-gradient-to-r from-amber-400 via-pink-400 to-indigo-500 text-white font-fun">
+                    <h2 class="text-3xl font-bold">Matematik Bersama Cikgu Wi</h2>
+                    <p class="text-sm opacity-90">Faham Konsep • Kuasai Kemahiran • Capai Kejayaan</p>
+                </div>
+            </div>
+
+            <div class="inline-block bg-yellow-400 text-indigo-950 font-fun font-bold px-5 py-1.5 rounded-full text-base mb-3 shadow">
+                🎮 Kuiz Interaktif Tingkatan 2
+            </div>
+            <h1 class="text-2xl md:text-4xl font-bold text-indigo-950 mb-2">Pola dan Jujukan</h1>
+            <p class="text-gray-600 mb-6 text-sm md:text-base">Jawab 15 soalan beraras. Langkah pengiraan ditunjukkan selepas setiap soalan!</p>
+
+            <form id="startForm" onsubmit="startGame(event)" class="space-y-4 max-w-md mx-auto text-left">
+                <div>
+                    <label class="block text-indigo-900 font-bold mb-1 text-sm md:text-base">Nama Murid:</label>
+                    <input type="text" id="studentName" required placeholder="Contoh: Amirah Ahmad"
+                        class="w-full px-4 py-3 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 focus:outline-none text-base">
+                </div>
+                <div>
+                    <label class="block text-indigo-900 font-bold mb-1 text-sm md:text-base">Kelas:</label>
+                    <input type="text" id="studentClass" required placeholder="Contoh: 2 Bestari"
+                        class="w-full px-4 py-3 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 focus:outline-none text-base">
+                </div>
+                
+                <!-- URL Google Apps Script Dipasang Otomatik -->
+                <input type="hidden" id="scriptUrl" value="https://script.google.com/macros/s/AKfycbwqGYGc_J8nV3iWbU2zv-vTwNN_8k0meLvawZCM8Z6bNT0grPu8U1pLWH8BAko2BY5d/exec">
+
+                <button type="submit" 
+                    class="btn-bounce w-full bg-emerald-500 hover:bg-emerald-600 text-white font-fun font-bold text-xl md:text-2xl py-3.5 rounded-2xl shadow-lg border-b-4 border-emerald-700 mt-2 cursor-pointer">
+                    MULA MAIN! 🚀
+                </button>
+            </form>
+        </div>
+
+        <!-- SKRIN 2: SOALAN KUIZ -->
+        <div id="quizScreen" class="glass-card rounded-3xl p-5 md:p-8 hidden">
+            <!-- Header Status -->
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-4 pb-3 border-b-2 border-indigo-100">
+                <div>
+                    <span id="levelBadge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-green-500">
+                        Aras Rendah
+                    </span>
+                    <h2 id="questionNumber" class="text-lg md:text-xl font-bold text-indigo-950 mt-1">Soalan 1 / 15</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-gray-500 block">Markah Semasa</span>
+                    <span id="scoreText" class="text-2xl font-fun font-bold text-amber-500">0</span>
+                </div>
+            </div>
+
+            <!-- Teks Soalan -->
+            <div class="mb-5 min-h-[50px]">
+                <p id="questionText" class="text-base md:text-lg font-bold text-gray-800 leading-relaxed"></p>
+            </div>
+
+            <!-- Pilihan Jawapan -->
+            <div id="optionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
+
+            <!-- Kotak Maklum Balas / Langkah Pengiraan -->
+            <div id="explanationBox" class="hidden p-4 rounded-2xl mb-4 text-sm md:text-base border-2">
+                <div class="font-bold mb-1 flex items-center justify-between" id="explanationTitle"></div>
+                <div id="explanationText" class="text-gray-700 leading-relaxed"></div>
+            </div>
+
+            <!-- Butang Next (Murid Perlu Tekan) -->
+            <button id="nextBtn" onclick="nextQuestion()" disabled
+                class="btn-bounce w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:border-gray-400 text-white font-fun font-bold text-lg md:text-xl py-3.5 rounded-2xl shadow-md border-b-4 border-indigo-900 transition cursor-pointer">
+                Soalan Seterusnya ➔
+            </button>
+        </div>
+
+        <!-- SKRIN 3: MARKAH & KEPUTUSAN -->
+        <div id="resultScreen" class="glass-card rounded-3xl p-6 md:p-8 text-center hidden">
+            <div class="text-6xl mb-2">🏆</div>
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-950 mb-1">Tahniah! Anda Selesai!</h1>
+            <p id="resultStudentInfo" class="text-gray-600 text-lg mb-6"></p>
+
+            <div class="bg-indigo-50 p-6 rounded-2xl border-2 border-indigo-100 max-w-sm mx-auto mb-6">
+                <span class="text-gray-500 font-bold block text-xs mb-1 uppercase tracking-wider">Markah Akhir</span>
+                <span id="finalScore" class="text-5xl font-fun font-bold text-amber-500">0 / 15</span>
+                <p id="scorePercentage" class="text-indigo-900 font-bold mt-2 text-lg"></p>
+            </div>
+
+            <div id="sheetStatus" class="text-xs md:text-sm font-semibold mb-6 p-3 rounded-xl bg-gray-100 text-gray-600">
+                ⏳ Menghantar markah ke Google Sheet Guru...
+            </div>
+
+            <button onclick="restartGame()" class="btn-bounce bg-emerald-500 hover:bg-emerald-600 text-white font-fun font-bold text-xl px-8 py-3 rounded-xl shadow-lg border-b-4 border-emerald-700 cursor-pointer">
+                Main Semula 🔄
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- SYNTHESIZER BUNYI (WEB AUDIO API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'correct') {
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    const noteOsc = audioCtx.createOscillator();
+                    const noteGain = audioCtx.createGain();
+                    noteOsc.connect(noteGain);
+                    noteGain.connect(audioCtx.destination);
+                    noteOsc.type = 'triangle';
+                    noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + (idx * 0.08));
+                    noteGain.gain.setValueAtTime(0.15, audioCtx.currentTime + (idx * 0.08));
+                    noteGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (idx * 0.08) + 0.2);
+                    noteOsc.start(audioCtx.currentTime + (idx * 0.08));
+                    noteOsc.stop(audioCtx.currentTime + (idx * 0.08) + 0.2);
+                });
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(160, audioCtx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'fanfare') {
+                const fanfareNotes = [440, 554.37, 659.25, 880];
+                fanfareNotes.forEach((freq, idx) => {
+                    const fOsc = audioCtx.createOscillator();
+                    const fGain = audioCtx.createGain();
+                    fOsc.connect(fGain);
+                    fGain.connect(audioCtx.destination);
+                    fOsc.type = 'triangle';
+                    fOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + (idx * 0.12));
+                    fGain.gain.setValueAtTime(0.2, audioCtx.currentTime + (idx * 0.12));
+                    fGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (idx * 0.12) + 0.4);
+                    fOsc.start(audioCtx.currentTime + (idx * 0.12));
+                    fOsc.stop(audioCtx.currentTime + (idx * 0.12) + 0.4);
+                });
+            }
+        }
+
+        // --- DATA 15 SOALAN BERARAS (BERSIH TANPA DOLAR) ---
+        const questions = [
+            // ARAS RENDAH (1-5)
+            {
+                level: "Rendah",
+                question: "Apakah nombor seterusnya dalam jujukan: 2, 5, 8, 11, ... ?",
+                options: ["13", "14", "15", "16"],
+                answer: 1,
+                explanation: "<strong>Pola:</strong> Menambah 3 kepada nombor sebelumnya.<br><strong>Langkah:</strong> 11 + 3 = 14."
+            },
+            {
+                level: "Rendah",
+                question: "Apakah pola bagi jujukan nombor: 50, 45, 40, 35, ... ?",
+                options: ["Menambah 5", "Menolak 5", "Darab 5", "Bahagi 5"],
+                answer: 1,
+                explanation: "<strong>Pola:</strong> Setiap nombor berkurangan sebanyak 5 daripada nombor sebelumnya (Menolak 5)."
+            },
+            {
+                level: "Rendah",
+                question: "Lengkapkan jujukan nombor ini: 1, 4, __, 16, 25, 36.",
+                options: ["8", "9", "10", "12"],
+                answer: 1,
+                explanation: "<strong>Pola:</strong> Kuasa dua sempurna (1², 2², 3², 4², 5², 6²).<br><strong>Langkah:</strong> 3² = 9."
+            },
+            {
+                level: "Rendah",
+                question: "Pilih 2 nombor seterusnya bagi jujukan: 3, 6, 12, 24, __, __.",
+                options: ["30, 36", "48, 96", "36, 48", "48, 72"],
+                answer: 1,
+                explanation: "<strong>Pola:</strong> Mendarab nombor sebelumnya dengan 2.<br><strong>Langkah:</strong> 24 × 2 = 48, kemudian 48 × 2 = 96."
+            },
+            {
+                level: "Rendah",
+                question: "Antara berikut, yang manakah merupakan Jujukan Nombor Fibonacci?",
+                options: ["2, 4, 6, 8, 10...", "1, 1, 2, 3, 5, 8...", "1, 3, 9, 27...", "5, 10, 15, 20..."],
+                answer: 1,
+                explanation: "<strong>Nombor Fibonacci:</strong> Bermula dengan 1, 1 dan nombor seterusnya diperoleh dengan menambah dua nombor sebelumnya (1+1=2, 1+2=3, 2+3=5, ...)."
+            },
+
+            // ARAS SEDERHANA (6-10)
+            {
+                level: "Sederhana",
+                question: "Cari nilai x dan y dalam jujukan Fibonacci ini: 1, 3, 4, x, 11, y",
+                options: ["x = 7, y = 18", "x = 6, y = 15", "x = 7, y = 15", "x = 8, y = 19"],
+                answer: 0,
+                explanation: "<strong>Pola Fibonacci:</strong> Hasil tambah dua nombor sebelumnya.<br><strong>Nilai x:</strong> 3 + 4 = 7.<br><strong>Nilai y:</strong> 7 + 11 = 18."
+            },
+            {
+                level: "Sederhana",
+                question: "Apakah baris ke-4 dalam Segitiga Pascal? (Baris pertama dianggap 1)",
+                options: ["1, 2, 1", "1, 3, 3, 1", "1, 4, 6, 4, 1", "1, 5, 10, 10, 5, 1"],
+                answer: 1,
+                explanation: "<strong>Segitiga Pascal:</strong><br>Baris 1: 1<br>Baris 2: 1, 1<br>Baris 3: 1, 2, 1<br>Baris 4: 1, 3, 3, 1"
+            },
+            {
+                level: "Sederhana",
+                question: "Nyatakan pola bagi jujukan nombor: 7, 13, 19, 25... menggunakan ungkapan algebra.",
+                options: ["6n + 1", "6n - 1", "5n + 2", "7n + 6"],
+                answer: 0,
+                explanation: "<strong>Beza:</strong> +6.<br>Untuk n = 1: 6(1) + 1 = 7.<br>Untuk n = 2: 6(2) + 1 = 13.<br>Maka, ungkapan algebra ialah <strong>6n + 1</strong>."
+            },
+            {
+                level: "Sederhana",
+                question: "Diberi formula sebutan ke-n, Tn = 3n + 2. Hitung nilai bagi sebutan ke-6 (T6).",
+                options: ["18", "20", "22", "24"],
+                answer: 1,
+                explanation: "<strong>Formula:</strong> Tn = 3n + 2<br>Gantikan n = 6:<br>T6 = 3(6) + 2<br>T6 = 18 + 2 = <strong>20</strong>."
+            },
+            {
+                level: "Sederhana",
+                question: "Tentukan sebutan ke-5 (T5) bagi jujukan: 81, 27, 9, 3, ...",
+                options: ["1", "0", "-3", "1/3"],
+                answer: 0,
+                explanation: "<strong>Pola:</strong> Bahagi dengan 3.<br>T1 = 81, T2 = 27, T3 = 9, T4 = 3.<br><strong>T5:</strong> 3 ÷ 3 = <strong>1</strong>."
+            },
+
+            // ARAS TINGGI (11-15)
+            {
+                level: "Tinggi",
+                question: "Diberi jujukan nombor: -3, 1, 5, 9, ... Ungkapan algebra bagi sebutan ke-n (Tn) ialah:",
+                options: ["4n - 7", "4n - 3", "3n - 6", "4n + 1"],
+                answer: 0,
+                explanation: "<strong>Beza antara sebutan:</strong> +4.<br>Uji n = 1: 4(1) - 7 = -3.<br>Uji n = 2: 4(2) - 7 = 1.<br>Maka ungkapan algebra ialah <strong>4n - 7</strong>."
+            },
+            {
+                level: "Tinggi",
+                question: "Diberi Tn = 2n² - 1. Apakah sebutan ke-4 (T4) bagi jujukan tersebut?",
+                options: ["15", "31", "63", "32"],
+                answer: 1,
+                explanation: "<strong>Gantikan n = 4:</strong><br>T4 = 2(4²) - 1<br>T4 = 2(16) - 1<br>T4 = 32 - 1 = <strong>31</strong>."
+            },
+            {
+                level: "Tinggi",
+                question: "Nombor manakah yang merupakan sebutan dalam jujukan Tn = 5n - 2?",
+                options: ["22", "33", "41", "48"],
+                answer: 3,
+                explanation: "<strong>Semak pilihan jawapan:</strong><br>Jika 5n - 2 = 48<br>5n = 50<br>n = 10 (Nombor bulat, jadi 48 ialah sebutan ke-10)."
+            },
+            {
+                level: "Tinggi",
+                question: "Rajah menunjukkan susunan batang korek api: Susunan 1 (3 batang), Susunan 2 (5 batang), Susunan 3 (7 batang). Berapakah jumlah batang korek api untuk Susunan ke-10?",
+                options: ["19", "21", "23", "25"],
+                answer: 1,
+                explanation: "<strong>Jujukan:</strong> 3, 5, 7, ... (Beza +2)<br><strong>Formula:</strong> Tn = 2n + 1<br>Untuk Susunan ke-10 (n = 10):<br>T10 = 2(10) + 1 = <strong>21</strong>."
+            },
+            {
+                level: "Tinggi",
+                question: "Diberi jujukan 4, 10, 16, 22, ... Jika sebutan ke-k ialah 70 (Tk = 70), cari nilai k.",
+                options: ["11", "12", "13", "14"],
+                answer: 1,
+                explanation: "<strong>Pola (Tn):</strong> 6n - 2<br>Setkan Tn = 70:<br>6k - 2 = 70 ➔ 6k = 72 ➔ k = <strong>12</strong>."
+            }
+        ];
+
+        // --- VARIABLE STATE ---
+        let currentQ = 0;
+        let score = 0;
+        let studentName = "";
+        let studentClass = "";
+        let scriptUrl = "";
+
+        // Init Animasi Latar Belakang
+        window.onload = function() {
+            const container = document.getElementById('bgShapes');
+            const symbols = ['+', '−', '×', '÷', 'Tn', '∑', 'π', '1,2,3', '∞'];
+            for(let i=0; i<22; i++) {
+                const el = document.createElement('div');
+                el.className = 'shape text-white font-bold text-2xl md:text-4xl';
+                el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                el.style.left = `${Math.random() * 100}%`;
+                el.style.animationDuration = `${12 + Math.random() * 14}s`;
+                el.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(el);
+            }
+        };
+
+        function startGame(e) {
+            e.preventDefault();
+            playSound('click');
+            studentName = document.getElementById('studentName').value;
+            studentClass = document.getElementById('studentClass').value;
+            scriptUrl = document.getElementById('scriptUrl').value;
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+
+            currentQ = 0;
+            score = 0;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQ];
+            
+            // Set Header & Aras Badge
+            document.getElementById('questionNumber').innerText = `Soalan ${currentQ + 1} / ${questions.length}`;
+            document.getElementById('scoreText').innerText = score;
+
+            const badge = document.getElementById('levelBadge');
+            badge.innerText = `Aras ${q.level}`;
+            if(q.level === "Rendah") badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-emerald-500";
+            else if(q.level === "Sederhana") badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-amber-500";
+            else badge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-rose-500";
+
+            // Set Soalan
+            document.getElementById('questionText').innerText = q.question;
+
+            // Render Pilihan Jawapan
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full p-3.5 md:p-4 rounded-xl border-2 border-indigo-100 bg-white hover:bg-indigo-50 font-semibold text-gray-800 text-left flex items-center gap-3 cursor-pointer';
+                btn.innerHTML = `<span class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center shrink-0">${String.fromCharCode(65+idx)}</span> <span>${opt}</span>`;
+                btn.onclick = () => selectOption(idx);
+                container.appendChild(btn);
+            });
+
+            // Sembunyikan Kotak Explanation & Nyahaktif Butang Next
+            document.getElementById('explanationBox').classList.add('hidden');
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        function selectOption(index) {
+            const q = questions[currentQ];
+            const buttons = document.getElementById('optionsContainer').children;
+            
+            // Nyahtaktifkan semua pilihan selepas dipilih
+            for(let btn of buttons) {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-indigo-50', 'cursor-pointer');
+            }
+
+            const expBox = document.getElementById('explanationBox');
+            const expTitle = document.getElementById('explanationTitle');
+            const expText = document.getElementById('explanationText');
+
+            if(index === q.answer) {
+                playSound('correct');
+                score++;
+                buttons[index].classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                
+                expBox.className = "p-4 rounded-2xl mb-4 text-sm md:text-base border-2 bg-emerald-50 border-emerald-300 block";
+                expTitle.className = "font-bold mb-1 text-emerald-800 flex items-center gap-2";
+                expTitle.innerHTML = "<span>✅ TEPAT SEKALI!</span>";
+            } else {
+                playSound('wrong');
+                buttons[index].classList.add('bg-rose-100', 'border-rose-500', 'text-rose-900');
+                buttons[q.answer].classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+
+                expBox.className = "p-4 rounded-2xl mb-4 text-sm md:text-base border-2 bg-rose-50 border-rose-300 block";
+                expTitle.className = "font-bold mb-1 text-rose-800 flex items-center gap-2";
+                expTitle.innerHTML = "<span>❌ KURANG TEPAT!</span>";
+            }
+
+            expText.innerHTML = q.explanation;
+            document.getElementById('scoreText').innerText = score;
+
+            // Aktifkan Butang Next Untuk Murid Tekan
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            currentQ++;
+            if(currentQ < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            playSound('fanfare');
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            document.getElementById('resultStudentInfo').innerText = `${studentName} (${studentClass})`;
+            document.getElementById('finalScore').innerText = `${score} / ${questions.length}`;
+
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('scorePercentage').innerText = `Peratusan: ${percentage}%`;
+
+            if(percentage >= 70) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+
+            // Hantar data terus ke Google Sheet Guru
+            sendDataToGoogleSheet(studentName, studentClass, score, questions.length, percentage);
+        }
+
+        function sendDataToGoogleSheet(name, className, scoreVal, totalVal, percentVal) {
+            const statusDiv = document.getElementById('sheetStatus');
+            statusDiv.innerText = "⏳ Sedang menyimpan markah ke Google Sheet Guru...";
+
+            fetch(scriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nama: name,
+                    kelas: className,
+                    markah: scoreVal,
+                    jumlah: totalVal,
+                    peratus: percentVal + "%",
+                    tarikh: new Date().toLocaleString('ms-MY')
+                })
+            })
+            .then(() => {
+                statusDiv.className = "text-xs md:text-sm font-semibold mb-6 p-3 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-300";
+                statusDiv.innerText = "✅ Markah anda telah berjaya disimpan ke Google Sheet Cikgu!";
+            })
+            .catch(err => {
+                statusDiv.className = "text-xs md:text-sm font-semibold mb-6 p-3 rounded-xl bg-rose-100 text-rose-800 border border-rose-300";
+                statusDiv.innerText = "❌ Ralat sambungan. Sila pastikan anda mempunyai capaian internet.";
+            });
+        }
+
+        function restartGame() {
+            playSound('click');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
